@@ -56,7 +56,8 @@ be any of the following options: red, crimson, orange, yellow, green,
 blue, indigo, or violet.
 ......................................................................*)
 
-type color_label = NotImplemented ;;
+type color_label = Red | Crimson | Orange 
+    | Yellow | Green | Blue |Indigo | Violet ;;
 
 (* You've just defined a new variant type! But this is an overly
 simplistic representation of colors. Let's make it more usable.
@@ -91,7 +92,7 @@ channels. You'll want to use Simple and RGB as the value constructors
 in this new variant type.
 ......................................................................*)
 
-type color = NotImplemented ;;
+type color = Simple of color_label | RGB of (int * int * int) ;;
 
 (* Note that there is an important assumption about the RGB values
 that determine whether a color is valid or not. The RGB type contains
@@ -117,8 +118,15 @@ an Invalid_Color exception with a useful message.
 
 exception Invalid_Color of string ;;
 
+
 let valid_rgb = 
-  fun _ -> failwith "valid_rgb not implemented" ;;
+  fun arg1 -> match arg1 with
+  | Simple _ -> arg1
+  | RGB (r, g, b) ->
+      if r < 0 || r > 255 then raise (Invalid_Color "Incorrect r value")
+      else if g < 0 || g > 255 then raise (Invalid_Color "Incorrect g value")
+      else if b < 0 || b > 255 then raise (Invalid_Color "Incorrect b value")
+      else RGB (r, g, b) ;;
 
 (*......................................................................
 Exercise 3: Write a function, make_color, that accepts three integers
@@ -127,8 +135,7 @@ to verify the invariant.
 ......................................................................*)
 
 let make_color = 
-  fun _ -> failwith "make_color not implemented" ;;
-
+  fun x y z -> valid_rgb (RGB (x, y, z));;
 (*......................................................................
 Exercise 4: Write a function, convert_to_rgb, that accepts a color and
 returns a 3-tuple of ints representing that color. This is trivial for
@@ -145,7 +152,12 @@ below are some other values you might find helpful.
 ......................................................................*)
 
 let convert_to_rgb = 
-  fun _ -> failwith "convert_to_rgb not implemented" ;;
+  fun arg -> match arg with
+  | Simple col -> (match col with
+      | Red -> RGB (255, 0,0)
+      | Green -> RGB(0, 255, 0)
+      | Blue -> RGB (0, 0, 255))
+  | RGB (x, y, z) -> (x, y, z);;
 
 (* If we want to blend two colors, we might be tempted to average each
 of the individual color channels. This might be fine, but a quirk in
@@ -170,7 +182,7 @@ sure to round your result when converting back to an integer.
 ......................................................................*)
 
 let blend_channel = 
-  fun _ -> failwith "blend_channel not implemented" ;;
+  fun channelA channelB -> int_of_float ((sqrt((float_of_int channelA)**2.) +. (float_of_int channelB)**2.) /. 2.);;
 
 (*......................................................................
 Exercise 6: Now write a function, blend, that returns the result of
@@ -205,7 +217,10 @@ should be. Then, consider the implications of representing the overall
 data type as a tuple or a record.
 ......................................................................*)
 
-type date = NotImplemented ;;
+type date = {year : int;
+             month : int;
+             day : int} ;;
+
 
 (* After you've thought it through, look up the Date module in the
 OCaml documentation to see how this was implemented there. If you
@@ -247,9 +262,18 @@ the invariant is violated, and returns the date if valid.
 
 exception Invalid_Date of string ;;
 
-let valid_date = 
-  fun _ -> failwith "valid_date not implemented" ;;
 
+
+
+(* let valid_date = 
+  fun rec -> if rec.year < 0 then raise (Invalid_Date "Invalid year") else
+  match rec.month with
+  | 1 | 3 | 5 | 7 | 8 | 10 | 12 -> if rec.days < 0 && rec.days > 31 then raise (Invalid_Date "Invalid days for month")
+  | 4 | 6 | 9 | 11 -> if rec.days < 0 && rec.days > 30 then raise (Invalid_Date "Invalid days for month")
+  | 2 -> if rec
+
+;;
+ *)
 
 (*======================================================================
 Part 3: Algebraic data types
@@ -262,7 +286,9 @@ Exercise 10: Define a person record type. Use the field names "name",
 "favorite", and "birthdate".
 ......................................................................*)
 
-type person = NotImplemented ;;
+type person = {name : string;
+              favorite : color;
+              birthdate : date} ;;
 
 (* Let's now do something with these person values. We'll create a
 data structure that allows us to model simple familial relationships.
